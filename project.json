@@ -1,0 +1,29 @@
+{
+  "overview": "ChatterBox is a full-featured Skype-like communication app with real-time messaging, group chats, voice/video calls, emoji reactions, typing indicators, message search, and read receipts — all running on the Internet Computer.",
+  "features": [
+    "1-on-1 direct messaging with read receipts",
+    "Group chats with member management",
+    "Voice and video calls via WebRTC (1-on-1)",
+    "Typing indicators in chats and groups",
+    "Message search across all conversations",
+    "Emoji reactions on messages",
+    "Presence indicators (online/away/offline)",
+    "File and image sharing",
+    "Contact management with request/accept flow",
+    "Secure login with Internet Identity"
+  ],
+  "category": "communication",
+  "tags": [
+    "messaging",
+    "chat",
+    "video-calls",
+    "voice-calls",
+    "real-time",
+    "groups",
+    "skype",
+    "webrtc",
+    "reactions",
+    "search"
+  ],
+  "last_updated": "2026-04-07T17:35:14.800Z"
+}

@@ -1,0 +1,241 @@
+type _ImmutableObjectStorageRefillResult = 
+ record {
+   success: opt bool;
+   topped_up_amount: opt nat;
+ };
+type _ImmutableObjectStorageRefillInformation = record {
+                                                  proposed_top_up_amount:
+                                                   opt nat;};
+type _ImmutableObjectStorageCreateCertificateResult = 
+ record {
+   blob_hash: text;
+   method: text;
+ };
+type UserRole = 
+ variant {
+   admin;
+   guest;
+   user;
+ };
+type UserId = principal;
+type Timestamp = int;
+type SendMessageRequest = 
+ record {
+   content: text;
+   file: opt ExternalBlob;
+ };
+type SearchResult = 
+ record {
+   content: text;
+   conversationId: text;
+   conversationType: ConversationType;
+   createdAt: Timestamp;
+   messageId: nat;
+   senderId: UserId;
+ };
+type SaveProfileRequest = 
+ record {
+   avatar: opt ExternalBlob;
+   status: text;
+   username: text;
+ };
+type ReactionEntry = 
+ record {
+   emoji: text;
+   users: vec UserId;
+ };
+type ProfilePublic = 
+ record {
+   avatar: opt ExternalBlob;
+   lastSeen: Timestamp;
+   presence: PresenceStatus;
+   status: text;
+   userId: UserId;
+   username: text;
+ };
+type PresenceStatus = 
+ variant {
+   away;
+   offline;
+   online;
+ };
+type MessageKind = 
+ variant {
+   file;
+   "text";
+ };
+type MessageId = nat;
+type Message = 
+ record {
+   content: text;
+   createdAt: Timestamp;
+   file: opt ExternalBlob;
+   id: MessageId;
+   kind: MessageKind;
+   senderId: UserId;
+ };
+type GroupSummary = 
+ record {
+   group: Group;
+   lastMessage: opt MessageId;
+   memberCount: nat;
+   unreadCount: nat;
+ };
+type GroupMemberRole = 
+ variant {
+   member;
+   owner;
+ };
+type GroupMember = 
+ record {
+   groupId: GroupId;
+   joinedAt: Timestamp;
+   role: GroupMemberRole;
+   userId: UserId;
+ };
+type GroupId = nat;
+type Group = 
+ record {
+   createdAt: Timestamp;
+   description: text;
+   icon: opt ExternalBlob;
+   id: GroupId;
+   name: text;
+   ownerId: UserId;
+ };
+type ExternalBlob = blob;
+type EditGroupRequest = 
+ record {
+   description: text;
+   icon: opt ExternalBlob;
+   name: text;
+ };
+type DirectConversationSummary = 
+ record {
+   conversationId: nat;
+   lastMessage: opt Message;
+   otherUserId: UserId;
+   otherUsername: text;
+   unreadCount: nat;
+ };
+type CreateGroupRequest = 
+ record {
+   description: text;
+   icon: opt ExternalBlob;
+   name: text;
+ };
+type ConversationType = 
+ variant {
+   direct;
+   group;
+ };
+type ContactStatus = 
+ variant {
+   accepted;
+   blocked;
+   pending;
+ };
+type ContactRequest = 
+ record {
+   createdAt: Timestamp;
+   from: UserId;
+   id: nat;
+   status: ContactStatus;
+   to: UserId;
+ };
+type Contact = 
+ record {
+   addedAt: Timestamp;
+   userId: UserId;
+   username: text;
+ };
+type CallStatus = 
+ variant {
+   active;
+   declined;
+   ended;
+   missed;
+   ringing;
+ };
+type CallStatePublic = 
+ record {
+   calleeCandidates: vec text;
+   calleeId: UserId;
+   callerCandidates: vec text;
+   callerId: UserId;
+   createdAt: Timestamp;
+   id: CallId;
+   isVideo: bool;
+   sdpAnswer: opt text;
+   sdpOffer: opt text;
+   status: CallStatus;
+   updatedAt: Timestamp;
+ };
+type CallId = nat;
+service : {
+  _immutableObjectStorageBlobsAreLive: (hashes: vec blob) -> (vec bool) query;
+  _immutableObjectStorageBlobsToDelete: () -> (vec blob) query;
+  _immutableObjectStorageConfirmBlobDeletion: (blobs: vec blob) -> ();
+  _immutableObjectStorageCreateCertificate: (blobHash: text) ->
+   (_ImmutableObjectStorageCreateCertificateResult);
+  _immutableObjectStorageRefillCashier: (refillInformation:
+   opt _ImmutableObjectStorageRefillInformation) ->
+   (_ImmutableObjectStorageRefillResult);
+  _immutableObjectStorageUpdateGatewayPrincipals: () -> ();
+  _initializeAccessControl: () -> ();
+  acceptCall: (callId: CallId, sdpAnswer: text) -> ();
+  acceptContactRequest: (requestId: nat) -> ();
+  addGroupMember: (groupId: GroupId, newMember: UserId) -> ();
+  addIceCandidate: (callId: CallId, candidate: text, isCallee: bool) -> ();
+  addReaction: (conversationId: text, messageId: nat, emoji: text) -> ();
+  assignCallerUserRole: (user: principal, role: UserRole) -> ();
+  createCall: (calleeId: UserId, sdpOffer: text, isVideo: bool) -> (CallId);
+  createGroup: (req: CreateGroupRequest) -> (GroupId);
+  declineCall: (callId: CallId) -> ();
+  editGroup: (groupId: GroupId, req: EditGroupRequest) -> ();
+  findUserByUsername: (username: text) -> (opt ProfilePublic) query;
+  getCallState: (callId: CallId) -> (opt CallStatePublic) query;
+  getCallerUserProfile: () -> (opt ProfilePublic) query;
+  getCallerUserRole: () -> (UserRole) query;
+  getContacts: () -> (vec Contact) query;
+  getDirectConversationSummaries: () -> (vec DirectConversationSummary) query;
+  getDirectMessageReaders: (conversationId: nat, messageId: MessageId) ->
+   (vec UserId) query;
+  getDirectMessages: (conversationId: nat, before: opt MessageId, limit:
+   nat) -> (vec Message) query;
+  getGroup: (groupId: GroupId) -> (opt Group) query;
+  getGroupMembers: (groupId: GroupId) -> (vec GroupMember) query;
+  getGroupMessageReaders: (groupId: GroupId, messageId: MessageId) ->
+   (vec UserId) query;
+  getGroupMessages: (groupId: GroupId, before: opt MessageId, limit: 
+   nat) -> (vec Message) query;
+  getOrCreateDirectConversation: (other: UserId) -> (nat);
+  getPendingCall: () -> (opt CallStatePublic) query;
+  getPendingContactRequests: () -> (vec ContactRequest) query;
+  getReactions: (conversationId: text, messageId: nat) ->
+   (vec ReactionEntry) query;
+  getSentContactRequests: () -> (vec ContactRequest) query;
+  getTypingUsers: (conversationId: text) -> (vec UserId) query;
+  getUnreadDirectCount: (conversationId: nat) -> (nat) query;
+  getUserGroups: () -> (vec GroupSummary) query;
+  getUserProfile: (userId: UserId) -> (opt ProfilePublic) query;
+  hangupCall: (callId: CallId) -> ();
+  heartbeat: () -> ();
+  isCallerAdmin: () -> (bool) query;
+  leaveGroup: (groupId: GroupId) -> ();
+  markDirectRead: (conversationId: nat, upToMessageId: MessageId) -> ();
+  markGroupRead: (groupId: GroupId, upToMsgId: MessageId) -> ();
+  rejectContactRequest: (requestId: nat) -> ();
+  removeContact: (target: UserId) -> ();
+  removeGroupMember: (groupId: GroupId, target: UserId) -> ();
+  removeReaction: (conversationId: text, messageId: nat, emoji: text) -> ();
+  saveCallerUserProfile: (req: SaveProfileRequest) -> ();
+  searchMessages: (searchTerm: text) -> (vec SearchResult) query;
+  sendContactRequest: (target: UserId) -> (nat);
+  sendDirectMessage: (conversationId: nat, req: SendMessageRequest) ->
+   (MessageId);
+  sendGroupMessage: (groupId: GroupId, req: SendMessageRequest) ->
+   (MessageId);
+  setPresence: (presence: PresenceStatus) -> ();
+  setTypingStatus: (conversationId: text, isTyping: bool) -> ();
+}
